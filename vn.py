@@ -43,31 +43,35 @@ def detect_language(text):
 
 # 處理 LINE 訊息事件
 @line_handler.add(MessageEvent, message=TextMessageContent)
+d@line_handler.add(MessageEvent, message=TextMessageContent)
 def handle_message(event):
     user_text = event.message.text
     source_lang = detect_language(user_text)
 
-    # 只處理中文與泰文的互譯
+    # 根據來源語言決定翻譯目標語言
     if source_lang.startswith("zh"):
-        target_langs = ['vi']
+        target_langs = ['vi', 'en']
     elif source_lang == 'vi':
-        target_langs = ['zh-TW']
+        target_langs = ['zh-TW', 'en']
+    elif source_lang == 'en':
+        target_langs = ['vi', 'zh-TW']
     else:
-        return  # 其他語言不回應
+        return  # 其他語言不處理
 
-    # 執行翻譯並準備回覆訊息
+    # 翻譯與組裝回覆
     reply_lines = []
     for tgt in target_langs:
         translated = translate_text(user_text, tgt)
         flag = {
             'zh-TW': "🇹🇼",
             'zh-CN': "🇹🇼",
-            'vi': "vn"
+            'vi': "🇻🇳",
+            'en': "🇺🇸"
         }.get(tgt, "")
         reply_lines.append(f"{flag} : {translated}")
     reply = "\n".join(reply_lines)
 
-    # 使用 quote_token 回覆引用訊息
+    # 回覆訊息
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
         line_bot_api.reply_message_with_http_info(
@@ -81,6 +85,7 @@ def handle_message(event):
                 ]
             )
         )
+
 
 # LINE webhook 路由
 @app.route("/callback", methods=['POST'])
