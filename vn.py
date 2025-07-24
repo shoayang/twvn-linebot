@@ -42,8 +42,8 @@ def detect_language(text):
     return res.json()['data']['detections'][0][0]['language']
 
 # 處理 LINE 訊息事件
+
 @line_handler.add(MessageEvent, message=TextMessageContent)
-d@line_handler.add(MessageEvent, message=TextMessageContent)
 def handle_message(event):
     user_text = event.message.text
     source_lang = detect_language(user_text)
